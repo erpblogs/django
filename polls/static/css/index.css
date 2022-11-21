@@ -1,0 +1,21 @@
+.expand {
+    background-color: lightgray;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    top: 30%;
+    height: 100%;
+    width: 100%;
+}
+
+.expand > span {
+    width: 100%;
+    line-height: 50px;
+    z-index: 1000;
+    position: absolute;
+    left: 0;
+}
+
+.main {
+    margin-bottom: 107px;
+}
