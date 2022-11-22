@@ -5,6 +5,31 @@ from django.views import generic
 from django.db.models import F
 
 from .models import Question, Choice
+import json
+import requests
+import pickle
+import os
+
+current_path = os.path.dirname(__file__)
+
+from pathlib import Path
+
+website_domain = '*****************'
+COOKIE_FILE = 'cookie.txt'
+filename = os.path.join(current_path, COOKIE_FILE)
+
+
+# COOKIE_FILE = 'cookie.txt'
+
+
+def save_cookies(requests_cookiejar, filename):
+    with open(filename, 'wb') as f:
+        pickle.dump(requests_cookiejar, f)
+
+
+def load_cookies(filename):
+    with open(filename, 'rb') as f:
+        return pickle.load(f)
 
 
 class IndexView(generic.ListView):
@@ -86,3 +111,49 @@ def vote(request, question_id):
         # with POST data. This prevents data from being posted twice if a
         # user hits the Back button.
         return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
+
+
+def applicant(request):
+    session = requests.Session()
+    # response = session.get('http://google.com')
+
+    headers = {
+        "Content-Type": "application/json",
+    }
+
+    # payload = {
+    #     "jsonrpc": "2.0",
+    #     "method": "call",
+    #     "id": 0,
+    #     "params": {
+    #         "db": "***********",
+    #         "login": "***********",
+    #         "password": "***********"
+    #     },
+    # }
+    # response = session.get(f"{website_domain}/web/session/authenticate", data=json.dumps(payload),
+    #                        headers={"Content-Type": "application/json"})
+    #
+    # save_cookies(session.cookies, COOKIE_FILE)
+
+    # print(session.cookies.get_dict())
+
+    applicant_payload = {
+        "jsonrpc": "2.0",
+        "method": "call",
+        "params":
+            {
+                "model": "ir.attachment",
+                "fields": [],
+                "domain": [["mimetype", "=", "application/pdf"]],
+                "limit": 10
+            }
+    }
+
+    # headers.update({"cookie": json.dumps({'session_id': 'ecc8ef53ec90f619b865edd7eff30219b268b352'})})
+
+    applicant = requests.get(f"{website_domain}/web/dataset/search_read", data=json.dumps(applicant_payload),
+                             headers=headers, cookies=load_cookies(filename))
+
+    return render(request, 'polls/applicant.html', {'applicants': applicant.json().get('result').get('records')})
+    # return HttpResponseRedirect(reverse('polls:applicant', args=(applicant)))
